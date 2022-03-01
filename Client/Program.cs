@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
 using GrainInterfaces;
@@ -15,18 +16,17 @@ namespace Client
         {
             try
             {
-                var secrets = Secrets.LoadFromFile();
                 // Configure a client and connect to the service.
                 var client = new ClientBuilder()
                     .UseLocalhostClustering(serviceId: Constants.ServiceId, clusterId: Constants.ClusterId)
-                    .AddSqsStreams(Constants.StreamProvider, options =>
+                    .AddAzureQueueStreams(Constants.StreamProvider, options =>
                     {
-                        options.ConfigurePartitioning(1);
-                        options.ConfigureStreamPubSub(StreamPubSubType.ImplicitOnly);
-                        options.ConfigureSqs(ob => ob.Configure(sqsOptions =>
+                        options.ConfigureAzureQueue(ob=>ob.Configure(aqOptions =>
                         {
-                            sqsOptions.ConnectionString = "Service=us-east-1";
+                            aqOptions.QueueNames = new List<string> { "test" };
+                            aqOptions.ConnectionString = "";
                         }));
+                        options.ConfigureStreamPubSub(StreamPubSubType.ImplicitOnly);
                     })
                     .ConfigureLogging(logging => logging.AddConsole())
                     .Build();

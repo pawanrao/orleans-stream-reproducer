@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Microsoft.Orleans.Streaming.AzureStorage</PackageId>
+    <Title>Microsoft Orleans Streaming Azure Storage</Title>
+    <Description>Microsoft Orleans streaming provider for Azure Queue Storage</Description>
+    <PackageTags>$(PackageTags) Azure Table Blob Storage</PackageTags>
+    <TargetFrameworks>$(StandardTargetFrameworks)</TargetFrameworks>
+    <AssemblyName>Orleans.Streaming.AzureStorage</AssemblyName>
+    <RootNamespace>Orleans.Streaming.AzureStorage</RootNamespace>
+    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <DefineConstants>$(DefineConstants);ORLEANS_STREAMING</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\Storage\AzureBlobUtils.cs" Link="Utilities\AzureBlobUtils.cs" />
+    <Compile Include="..\Shared\Storage\AzureStorageOperationOptions.cs" Link="Storage\AzureStorageOperationOptions.cs" />
+    <Compile Include="..\Shared\Storage\AzureStoragePolicyOptions.cs" Link="Storage\AzureStoragePolicyOptions.cs" />
+    <Compile Include="..\Shared\Storage\AzureTableDataManager.cs" Link="Storage\AzureTableDataManager.cs" />
+    <Compile Include="..\Shared\Storage\AzureTableUtils.cs" Link="Storage\AzureTableUtils.cs" />
+    <Compile Include="..\Shared\Utilities\ErrorCode.cs" Link="Utilities\ErrorCode.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SourceRoot)src\Orleans.Streaming\Orleans.Streaming.csproj" />
+    <PackageReference Include="Azure.Core" Version="$(AzureCoreVersion)" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="$(AzureStorageBlobsVersion)" />
+    <PackageReference Include="Azure.Storage.Queues" Version="$(AzureStorageQueuesVersion)" />
+    <PackageReference Include="Azure.Data.Tables" Version="$(AzureDataTablesVersion)" />
+    <PackageReference Include="System.Net.NameResolution" Version="$(SystemNetNameResolutionVersion)" />
+  </ItemGroup>
+</Project>

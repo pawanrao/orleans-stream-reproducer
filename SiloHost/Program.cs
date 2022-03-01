@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Orleans.Hosting;
@@ -15,9 +18,18 @@ namespace SiloHost
             try
             {
                 var host = new HostBuilder()
-                    .UseOrleans(ConfigureSilo)
-                    .ConfigureLogging(logging =>
+                    .ConfigureAppConfiguration((hostingContext, config) =>
                     {
+                        config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                    })
+                    .ConfigureHostConfiguration(config =>
+                    {
+                        config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                    })
+                    .UseOrleans(ConfigureSilo)
+                    .ConfigureLogging((hostingContext, logging) =>
+                    {
+                        logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
                         logging.AddConsole(c =>
                         {
                             c.TimestampFormat = "[yyyy-MM-dd HH:mm:ss] ";
@@ -39,21 +51,21 @@ namespace SiloHost
 
         private static void ConfigureSilo(ISiloBuilder siloBuilder)
         {
-            var secrets = Secrets.LoadFromFile();
             siloBuilder
                 .AddMemoryGrainStorage("PubSubStore")
-                .AddSqsStreams(Constants.StreamProvider, options =>
+                .AddAzureQueueStreams(Constants.StreamProvider, options =>
                 {
-                    options.ConfigurePartitioning(1);
-                    options.ConfigureStreamPubSub(StreamPubSubType.ImplicitOnly);
-                    options.ConfigureSqs(ob => ob.Configure(sqsOptions =>
+                    options.ConfigureAzureQueue(ob => ob.Configure(aqOptions =>
                     {
-                        sqsOptions.ConnectionString = "Service=us-east-1";
+                        aqOptions.QueueNames = new List<string> { "test" };
+                        aqOptions.ConnectionString = "";
                     }));
-                    options.ConfigurePullingAgent(ob => ob.Configure(pOps =>
-                      {
-                          pOps.BatchContainerBatchSize = 2;
-                      }));
+                    options.ConfigureStreamPubSub(StreamPubSubType.ImplicitOnly);
+                    options.ConfigurePullingAgent(ob=>ob.Configure(ops =>
+                    {
+                        ops.BatchContainerBatchSize = 2;
+                    }));
+
                 })
                 .UseLocalhostClustering(serviceId: Constants.ServiceId, clusterId: Constants.ServiceId);
         }
